@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config(); // still used for MONGO_URI, but not for URLs
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// CORS: allow only your frontend (hardcoded)
+app.use(cors({ origin: "https://ckf-attendance.onrender.com", credentials: true }));
 app.use(express.json());
 
 /* =========================
@@ -56,7 +56,7 @@ app.post("/api/users", async (req, res) => {
 });
 
 /* =========================
-   GET ALL USERS (VIEW LIST)
+   GET ALL USERS
 ========================= */
 app.get("/api/users", async (req, res) => {
   try {
@@ -78,7 +78,7 @@ app.get("/api/users", async (req, res) => {
 /* =========================
    START SERVER
 ========================= */
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`)
