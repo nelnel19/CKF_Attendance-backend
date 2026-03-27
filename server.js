@@ -2,17 +2,12 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
 const app = express();
 
-// CORS: allow only your frontend
+// CORS: allow your frontend
 app.use(cors({ origin: "https://ckf-attendance.onrender.com", credentials: true }));
 app.use(express.json());
 
@@ -133,18 +128,6 @@ app.delete("/api/users/:id", async (req, res) => {
       message: err.message,
     });
   }
-});
-
-/* =========================
-   Serve static files for production
-========================= */
-// Serve static files from the React build folder
-app.use(express.static(path.join(__dirname, "dist")));
-
-// Handle React Router - serve index.html for all non-API routes
-// This must be the LAST route handler
-app.get(/^\/(?!api).*$/, (req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 /* =========================
