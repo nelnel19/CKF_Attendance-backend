@@ -2,14 +2,24 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
 const app = express();
 
-// CORS: allow only your frontend (hardcoded)
+// CORS: allow only your frontend
 app.use(cors({ origin: "https://ckf-attendance.onrender.com", credentials: true }));
 app.use(express.json());
+
+// Serve static files from the React build folder in production
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "dist")));
+}
 
 /* =========================
    MONGODB CONNECTION
@@ -19,11 +29,12 @@ mongoose.connect(process.env.MONGO_URI)
   .catch((err) => console.log("MongoDB Error:", err));
 
 /* =========================
-   USER SCHEMA
+   USER SCHEMA (with gender)
 ========================= */
 const userSchema = new mongoose.Schema(
   {
     fullName: { type: String, required: true },
+    gender: { type: String, enum: ["Male", "Female"], required: true },
     age: { type: Number, required: true },
     address: { type: String, required: true },
     contactNo: { type: String, required: true },
@@ -128,6 +139,15 @@ app.delete("/api/users/:id", async (req, res) => {
     });
   }
 });
+
+/* =========================
+   Handle React Router - Serve index.html for all non-API routes
+========================= */
+if (process.env.NODE_ENV === "production") {
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "dist", "index.html"));
+  });
+}
 
 /* =========================
    START SERVER
