@@ -16,11 +16,6 @@ const app = express();
 app.use(cors({ origin: "https://ckf-attendance.onrender.com", credentials: true }));
 app.use(express.json());
 
-// Serve static files from the React build folder in production
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "dist")));
-}
-
 /* =========================
    MONGODB CONNECTION
 ========================= */
@@ -141,13 +136,16 @@ app.delete("/api/users/:id", async (req, res) => {
 });
 
 /* =========================
-   Handle React Router - Serve index.html for all non-API routes
+   Serve static files for production
 ========================= */
-if (process.env.NODE_ENV === "production") {
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "dist", "index.html"));
-  });
-}
+// Serve static files from the React build folder
+app.use(express.static(path.join(__dirname, "dist")));
+
+// Handle React Router - serve index.html for all non-API routes
+// This must be the LAST route handler
+app.get(/^\/(?!api).*$/, (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
 
 /* =========================
    START SERVER
